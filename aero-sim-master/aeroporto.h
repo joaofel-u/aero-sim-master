@@ -3,8 +3,13 @@
 
 #include "aviao.h"
 #include "fila.h"
+#include <smaphore.h>
 
 typedef size_t tempo_t;
+
+sem_t semaforo_pistas;
+sem_t semaforo_esteiras;
+
 
 typedef struct {
 	size_t n_pistas
