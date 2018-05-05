@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "aeroporto.h"
+#include "aviao.h"
 
 #define NOVO_AVIAO_MIN 30
 #define NOVO_AVIAO_MAX 120
@@ -13,6 +14,11 @@
 #define TEMPO_INSERIR_BAGAGENS 110
 #define TEMPO_BAGAGENS_ESTEIRA 200
 #define TEMPO_SIMULACAO 10000
+
+void * thread_aviao_func(void* arg);  // Funcao de uma thread que representa um aviao
+void * thread_aviao_func(void* arg);  // Funcao de uma thread que representa um aeroporto
+
+bool quit_thread_aeroporto = false;  // Sinaliza quando a thread_aeroporto deve encerrar
 
 int main (int argc, char** argv) {
 
@@ -94,8 +100,46 @@ int main (int argc, char** argv) {
 
 	// Descreve aqui sua simulação usando as funções definidas no arquivo "aeroporto.h"
 	// Lembre-se de implementá-las num novo arquivo "aeroporto.c"
+	pthread_t thread_aeroporto;
+	pthread_create(&thread_aeroporto, NULL, thread_aeroporto_func, (void *) meu_aeroporto);
+	meu_aeroporto->thread = thread_aeroporto;
 
+	int proximo_horario = 0;
+	int n_avioes_dia = 0;  // Auxilia no controle do id unico de cada aviao
+	for (int i = 0; i < TEMPO_SIMULACAO; i++) {
+		if (i == proximo_horario) {
+			// Calcula horario de chegada do proximo aviao
+			srand(time(NULL));
+			proximo_horario = i + (rand() % 90) + 30;
+
+			// Cria aviao
+			int combustivel_novo_aviao = (rand() % 100) + 1
+			aviao_t *a = aloca_aviao(combustivel_novo_aviao, ++n_avioes_dia);
+
+			// Atribui uma thread responsavel pelo aviao criado
+			pthread_t thread;
+			pthread_create(&thread, NULL, thread_aviao_func, (void *) a);
+			a->thread = thread;
+		}
+	}
+
+	quit_thread_aeroporto = true;  // Sinaliza para a thread_aeroporto encerrar
+	pthread_join(&thread_aeroporto, NULL);
 
 	finalizar_aeroporto(meu_aeroporto);
 	return 1;
+}
+
+void * thread_aviao_func(void* arg) {  // Arg = aviao da thread
+	aviao_t* aviao = (aviao_t *) arg;
+	aproximacao_aeroporto(meu_aeroporto, aviao);
+
+}
+
+void * thread_aeroporto_func(void* arg) {  // Arg = aeroporto da thread
+	aeroporto_t* aeroporto = (aeroporto_t *) arg;
+	while (quit_thread_aeroporto == false) {
+
+	}
+	pthread_exit(NULL);
 }
