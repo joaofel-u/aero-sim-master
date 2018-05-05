@@ -1,6 +1,8 @@
 #ifndef FILA_AVIAO_H
 #define FILA_AVIAO_H
 
+#define TAMANHO_MAX_FILA_AVIOES 30  // VER
+
 #include "aviao.h"
 
 /**
