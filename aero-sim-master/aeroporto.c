@@ -7,23 +7,7 @@
  **/
 
 aeroporto_t* iniciar_aeroporto (size_t* args, size_t n_args) {
-<<<<<<< HEAD
-	aeroporto_t aeroporto;
-	aeroporto.n_pistas = args[0];
-	aeroporto.n_portoes = args[1];
-	aeroporto.n_esteiras = args[2];
-	aeroporto.n_max_avioes_esteira = args[3];
 
-	aeroporto.t_pouso_decolagem = args[4];
-	aeroporto.t_remover_bagagens = args[5];
-	aeroporto.t_inserir_bagagens = args[6];
-	aeroporto.t_bagagens_esteira = args[7];
-
-	sem_init(&semaforo_pistas);
-	sem_init(&semaforo_esteiras)
-
-	return aeroporto;
-=======
 	aeroporto_t *a = (aeroporto_t *) malloc(sizeof(aeroporto_t));
 	a->n_pistas = args[0];
 	a->n_portoes = args[1];
@@ -38,7 +22,6 @@ aeroporto_t* iniciar_aeroporto (size_t* args, size_t n_args) {
 	sem_init(&(a->portoes), 0, a->n_portoes);
 	sem_init(&(a->esteiras), 0, (a->n_esteiras * a->n_max_avioes_esteira));
 	return a;
->>>>>>> 5444516b1857607be3327df93fac88845a80e661
 }
 
 void aproximacao_aeroporto (aeroporto_t* aeroporto, aviao_t* aviao) {

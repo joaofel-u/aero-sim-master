@@ -3,14 +3,10 @@
 
 #include "aviao.h"
 #include "fila.h"
-<<<<<<< HEAD
 #include <smaphore.h>
-=======
-#include "semaphore.h"
 #include "unistd.h"		// para uso de tempo em microssegundos
 
 #define MICRO_TO_MILI 1000
->>>>>>> 5444516b1857607be3327df93fac88845a80e661
 
 typedef size_t tempo_t;
 
