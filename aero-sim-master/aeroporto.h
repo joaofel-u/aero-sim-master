@@ -3,6 +3,10 @@
 
 #include "aviao.h"
 #include "fila.h"
+#include "semaphore.h"
+#include "unistd.h"		// para uso de tempo em microssegundos
+
+#define MICRO_TO_MILI 1000
 
 typedef size_t tempo_t;
 
@@ -15,6 +19,13 @@ typedef struct {
 	tempo_t t_remover_bagagens;
 	tempo_t t_inserir_bagagens;
 	tempo_t t_bagagens_esteira;
+
+	// ADICIONADOS
+	pthread_t thread;
+	fila_ordenada_t *fila_pouso_decolagem;
+	semaphore_t pistas;
+	semaphore_t portoes;
+	semaphore_t esteiras;
 	// Adicionar aqui outros atributos que você achar necessários.
 	// Exemplo: esteiras, portões, etc...
 } aeroporto_t;
