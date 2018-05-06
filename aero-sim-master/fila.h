@@ -3,7 +3,10 @@
 
 #define TAMANHO_MAX_FILA_AVIOES 30  // VER
 
+#include "stdlib.h"
 #include "aviao.h"
+
+// Garantir que é thread-safe
 
 /**
  * Esta estrutura auxiliar deve facilitar a implementação da fila ordenada.
@@ -29,6 +32,7 @@ typedef struct {
   elemento_t * primeiro;
   elemento_t * ultimo;
   size_t n_elementos;
+  pthread_mutex_t mutex;
 } fila_ordenada_t;
 
 // Alocacão dinâmica da fila ordenada de aviões
