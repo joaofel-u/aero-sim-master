@@ -1,17 +1,19 @@
 #ifndef AEROPORTO_H
 #define AEROPORTO_H
 
-#include "aviao.h"
-#include "fila.h"
 #include <semaphore.h>
 #include "unistd.h"		// para uso de tempo em microssegundos
+#include "stdlib.h"
+#include "stdio.h"
+#include "aviao.h"
+#include "fila.h"
 
 #define MICRO_TO_MILI 1000
 
 typedef size_t tempo_t;
 
-sem_t semaforo_pistas;
-sem_t semaforo_esteiras;
+/*sem_t semaforo_pistas;
+sem_t semaforo_esteiras;*/  // Verificar necessidade de ser global
 
 
 typedef struct {

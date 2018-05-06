@@ -20,6 +20,8 @@
 	gcc -o build aeroporto.c aeroporto.h aviao.c aviao.h fila.c fila.h main.c -lpthread
 */
 
+aeroporto_t* meu_aeroporto;  // Ver necessidade de ser global
+
 void * thread_aviao_func(void* arg);  // Funcao de uma thread que representa um aviao
 void * thread_aeroporto_func(void* arg);  // Funcao de uma thread que representa um aeroporto
 
@@ -101,20 +103,22 @@ int main (int argc, char** argv) {
 				t_pouso_decolagem, t_remover_bagagens,
 				t_inserir_bagagens, t_bagagens_esteira};
 
-	aeroporto_t* meu_aeroporto = iniciar_aeroporto(args, n_args);
+	meu_aeroporto = iniciar_aeroporto(args, n_args);
 
 	// Descreve aqui sua simulação usando as funções definidas no arquivo "aeroporto.h"
 	// Lembre-se de implementá-las num novo arquivo "aeroporto.c"
 	pthread_t thread_aeroporto;
-	pthread_create(&thread_aeroporto, NULL, thread_aeroporto_func(), (void *) meu_aeroporto);
+	pthread_create(&thread_aeroporto, NULL, thread_aeroporto_func, (void *) meu_aeroporto);
 	meu_aeroporto->thread = thread_aeroporto;
 
 	int proximo_horario = 0;
 	int n_avioes_dia = 0;  // Auxilia no controle do id unico de cada aviao
-	for (int i = 0; i < TEMPO_SIMULACAO; i++) {
+	srand(time(NULL));  // Inicia a semente do rand
+
+	// for (int i = 0; i < TEMPO_SIMULACAO; i++) {  // LINHA OFICIAL
+	for (int i = 0; i < 1000; i++) {  // Linha para simplificar os testes
 		if (i == proximo_horario) {
 			// Calcula horario de chegada do proximo aviao
-			srand(time(NULL));
 			proximo_horario = i + (rand() % 90) + 30;
 
 			// Cria aviao
@@ -124,12 +128,12 @@ int main (int argc, char** argv) {
 			// Atribui uma thread responsavel pelo aviao criado
 			pthread_t thread;
 			pthread_create(&thread, NULL, thread_aviao_func, (void *) a);
-			a->thread = thread;
+			a->thread = thread;  // VER
 		}
 	}
-
+	sleep(1000);  // REVER MODELO (esperar todos terminarem)
 	quit_thread_aeroporto = 1;  // Sinaliza para a thread_aeroporto encerrar
-	pthread_join(&thread_aeroporto, NULL);
+	pthread_join(thread_aeroporto, NULL);
 
 	finalizar_aeroporto(meu_aeroporto);
 	return 1;
@@ -137,8 +141,15 @@ int main (int argc, char** argv) {
 
 void * thread_aviao_func(void* arg) {  // Arg = aviao da thread
 	aviao_t* aviao = (aviao_t *) arg;
+	// aviao->thread = pthread_self();  // Ver se isso funciona
 	aproximacao_aeroporto(meu_aeroporto, aviao);
-
+	while (aviao != meu_aeroporto->fila_pouso_decolagem->primeiro->dado) {
+		sleep(1);  // Força preempção?
+	}
+	pousar_aviao(meu_aeroporto, aviao);
+	acoplar_portao(meu_aeroporto, aviao);
+	transportar_bagagens(meu_aeroporto, aviao);
+	decolar_aviao(meu_aeroporto, aviao);
 }
 
 void * thread_aeroporto_func(void* arg) {  // Arg = aeroporto da thread

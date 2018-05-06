@@ -26,38 +26,37 @@ aeroporto_t* iniciar_aeroporto (size_t* args, size_t n_args) {
 
 void aproximacao_aeroporto (aeroporto_t* aeroporto, aviao_t* aviao) {
 	inserir(aeroporto->fila_pouso_decolagem, aviao);
-	printf("Avião %d iniciou aproximação com %d%c de combustivel.\n", aviao->id, aviao->combustivel, 37);
+	printf("Avião %d iniciou aproximação com %d%c de combustivel.\n", (int) aviao->id, (int) aviao->combustivel, 37);
 }
 
 void pousar_aviao (aeroporto_t* aeroporto, aviao_t* aviao) {
 	remover(aeroporto->fila_pouso_decolagem);
 	usleep(aeroporto->t_pouso_decolagem * MICRO_TO_MILI);
-	printf("Avião %d aterrissou.\n", aviao->id);
+	printf("Avião %d aterrissou.\n", (int) aviao->id);
 }
 
 void acoplar_portao (aeroporto_t* aeroporto, aviao_t* aviao) {
-	printf("Avião %d chegou a um portão de embarque/desembarque.\n", aviao->id);
+	printf("Avião %d chegou a um portão de embarque/desembarque.\n", (int) aviao->id);
 }
 
 void transportar_bagagens (aeroporto_t* aeroporto, aviao_t* aviao) {
 	usleep(aeroporto->t_remover_bagagens * MICRO_TO_MILI);
-	printf("Avião %d foi descarregado.\n", aviao->id);
+	printf("Avião %d foi descarregado.\n", (int) aviao->id);
 	adicionar_bagagens_esteira(aeroporto, aviao);
 	usleep(aeroporto->t_inserir_bagagens * MICRO_TO_MILI);
-	printf("Avião %d foi carregado com novas bagagens.\n", aviao->id);
+	printf("Avião %d foi carregado com novas bagagens.\n", (int) aviao->id);
 }
 
 void adicionar_bagagens_esteira (aeroporto_t* aeroporto, aviao_t* aviao) {
-	printf("Bagagens do avião %d adicionadas à uma esteira.\n", aviao->id);
+	printf("Bagagens do avião %d adicionadas à uma esteira.\n", (int) aviao->id);
 	usleep(aeroporto->t_bagagens_esteira * MICRO_TO_MILI);
 }
 
 void decolar_aviao (aeroporto_t* aeroporto, aviao_t* aviao) {
-	// Essa linha tá dando erro, tem 2 argumentos
-	//remover(aeroporto->fila_pouso_decolagem, aviao);
-	remover(aviao);
+	// Garantir que aviao e' o primeiro na lista de pouso_decolagem
+	remover(aeroporto->fila_pouso_decolagem);
 	usleep(aeroporto->t_pouso_decolagem * MICRO_TO_MILI);
-	printf("Avião %d decolou.\n", aviao->id);
+	printf("Avião %d decolou.\n", (int) aviao->id);
 }
 
 int finalizar_aeroporto (aeroporto_t* aeroporto) {
