@@ -15,10 +15,15 @@
 #define TEMPO_BAGAGENS_ESTEIRA 200
 #define TEMPO_SIMULACAO 10000
 
-void * thread_aviao_func(void* arg);  // Funcao de uma thread que representa um aviao
-void * thread_aviao_func(void* arg);  // Funcao de uma thread que representa um aeroporto
+/*
+	COMANDO PARA COMPILAR:
+	gcc -o build aeroporto.c aeroporto.h aviao.c aviao.h fila.c fila.h main.c -lpthread
+*/
 
-bool quit_thread_aeroporto = false;  // Sinaliza quando a thread_aeroporto deve encerrar
+void * thread_aviao_func(void* arg);  // Funcao de uma thread que representa um aviao
+void * thread_aeroporto_func(void* arg);  // Funcao de uma thread que representa um aeroporto
+
+int quit_thread_aeroporto = 0;  // Sinaliza quando a thread_aeroporto deve encerrar
 
 int main (int argc, char** argv) {
 
@@ -101,7 +106,7 @@ int main (int argc, char** argv) {
 	// Descreve aqui sua simulação usando as funções definidas no arquivo "aeroporto.h"
 	// Lembre-se de implementá-las num novo arquivo "aeroporto.c"
 	pthread_t thread_aeroporto;
-	pthread_create(&thread_aeroporto, NULL, thread_aeroporto_func, (void *) meu_aeroporto);
+	pthread_create(&thread_aeroporto, NULL, thread_aeroporto_func(), (void *) meu_aeroporto);
 	meu_aeroporto->thread = thread_aeroporto;
 
 	int proximo_horario = 0;
@@ -113,7 +118,7 @@ int main (int argc, char** argv) {
 			proximo_horario = i + (rand() % 90) + 30;
 
 			// Cria aviao
-			int combustivel_novo_aviao = (rand() % 100) + 1
+			int combustivel_novo_aviao = (rand() % 100) + 1;
 			aviao_t *a = aloca_aviao(combustivel_novo_aviao, ++n_avioes_dia);
 
 			// Atribui uma thread responsavel pelo aviao criado
@@ -123,7 +128,7 @@ int main (int argc, char** argv) {
 		}
 	}
 
-	quit_thread_aeroporto = true;  // Sinaliza para a thread_aeroporto encerrar
+	quit_thread_aeroporto = 1;  // Sinaliza para a thread_aeroporto encerrar
 	pthread_join(&thread_aeroporto, NULL);
 
 	finalizar_aeroporto(meu_aeroporto);
@@ -138,7 +143,7 @@ void * thread_aviao_func(void* arg) {  // Arg = aviao da thread
 
 void * thread_aeroporto_func(void* arg) {  // Arg = aeroporto da thread
 	aeroporto_t* aeroporto = (aeroporto_t *) arg;
-	while (quit_thread_aeroporto == false) {
+	while (!quit_thread_aeroporto) {
 
 	}
 	pthread_exit(NULL);

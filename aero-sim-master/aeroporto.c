@@ -53,7 +53,9 @@ void adicionar_bagagens_esteira (aeroporto_t* aeroporto, aviao_t* aviao) {
 }
 
 void decolar_aviao (aeroporto_t* aeroporto, aviao_t* aviao) {
-	remover(aeroporto->fila_pouso_decolagem, aviao);
+	// Essa linha tá dando erro, tem 2 argumentos
+	//remover(aeroporto->fila_pouso_decolagem, aviao);
+	remover(aviao);
 	usleep(aeroporto->t_pouso_decolagem * MICRO_TO_MILI);
 	printf("Avião %d decolou.\n", aviao->id);
 }
