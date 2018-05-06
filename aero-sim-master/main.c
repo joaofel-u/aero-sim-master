@@ -142,13 +142,19 @@ int main (int argc, char** argv) {
 void * thread_aviao_func(void* arg) {  // Arg = aviao da thread
 	aviao_t* aviao = (aviao_t *) arg;
 	// aviao->thread = pthread_self();  // Ver se isso funciona
+
 	aproximacao_aeroporto(meu_aeroporto, aviao);
+
+	// Espera o aviao ser o proximo a ser autorizado a usar a pista
 	while (aviao != meu_aeroporto->fila_pouso_decolagem->primeiro->dado) {
 		sleep(1);  // Força preempção?
 	}
 	pousar_aviao(meu_aeroporto, aviao);
+
 	acoplar_portao(meu_aeroporto, aviao);
+
 	transportar_bagagens(meu_aeroporto, aviao);
+
 	decolar_aviao(meu_aeroporto, aviao);
 }
 

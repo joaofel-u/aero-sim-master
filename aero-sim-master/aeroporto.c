@@ -18,9 +18,9 @@ aeroporto_t* iniciar_aeroporto (size_t* args, size_t n_args) {
 	a->t_inserir_bagagens = args[6];
 	a->t_bagagens_esteira = args[7];
 	a->fila_pouso_decolagem = criar_fila();
-	sem_init(&(a->pistas), 0, a->n_pistas);
-	sem_init(&(a->portoes), 0, a->n_portoes);
-	sem_init(&(a->esteiras), 0, (a->n_esteiras * a->n_max_avioes_esteira));
+	sem_init(&a->pistas, 0, a->n_pistas);
+	sem_init(&a->portoes, 0, a->n_portoes);
+	sem_init(&a->esteiras, 0, (a->n_esteiras * a->n_max_avioes_esteira));
 	return a;
 }
 
@@ -30,33 +30,44 @@ void aproximacao_aeroporto (aeroporto_t* aeroporto, aviao_t* aviao) {
 }
 
 void pousar_aviao (aeroporto_t* aeroporto, aviao_t* aviao) {
+	sem_wait(&aeroporto->pistas);
 	remover(aeroporto->fila_pouso_decolagem);
 	usleep(aeroporto->t_pouso_decolagem * MICRO_TO_MILI);
 	printf("Avião %d aterrissou.\n", (int) aviao->id);
 }
 
 void acoplar_portao (aeroporto_t* aeroporto, aviao_t* aviao) {
+	sem_post(&aeroporto->pistas);  // Inverter esta com a proxima se necessario ocupar para desocupar anterior
+	sem_wait(&aeroporto->portoes);
 	printf("Avião %d chegou a um portão de embarque/desembarque.\n", (int) aviao->id);
 }
 
 void transportar_bagagens (aeroporto_t* aeroporto, aviao_t* aviao) {
 	usleep(aeroporto->t_remover_bagagens * MICRO_TO_MILI);
 	printf("Avião %d foi descarregado.\n", (int) aviao->id);
-	adicionar_bagagens_esteira(aeroporto, aviao);
+	adicionar_bagagens_esteira(aeroporto, aviao);  // Ver sobre retirar esta linha
 	usleep(aeroporto->t_inserir_bagagens * MICRO_TO_MILI);
 	printf("Avião %d foi carregado com novas bagagens.\n", (int) aviao->id);
 }
 
 void adicionar_bagagens_esteira (aeroporto_t* aeroporto, aviao_t* aviao) {
+	sem_wait(&aeroporto->esteiras);
 	printf("Bagagens do avião %d adicionadas à uma esteira.\n", (int) aviao->id);
 	usleep(aeroporto->t_bagagens_esteira * MICRO_TO_MILI);
+	sem_post(&aeroporto->esteiras);
 }
 
 void decolar_aviao (aeroporto_t* aeroporto, aviao_t* aviao) {
-	// Garantir que aviao e' o primeiro na lista de pouso_decolagem
+	inserir(aeroporto->fila_pouso_decolagem, aviao);
+	while (aviao != aeroporto->fila_pouso_decolagem->primeiro->dado) {
+		sleep(1);  // Força preempção?
+	}
+	sem_post(&aeroporto->portoes);  // Inverter esta e a proxima se necessario desocupar para ocupar
+	sem_wait(&aeroporto->pistas);
 	remover(aeroporto->fila_pouso_decolagem);
 	usleep(aeroporto->t_pouso_decolagem * MICRO_TO_MILI);
 	printf("Avião %d decolou.\n", (int) aviao->id);
+	sem_post(&aeroporto->pistas);
 }
 
 int finalizar_aeroporto (aeroporto_t* aeroporto) {
