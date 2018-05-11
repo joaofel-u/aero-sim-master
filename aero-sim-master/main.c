@@ -20,6 +20,10 @@
 	gcc -o build aeroporto.c aeroporto.h aviao.c aviao.h fila.c fila.h main.c -lpthread
 */
 
+// Cuidar com o seg
+pthread_t threads_avioes[TEMPO_SIMULACAO];
+int contador_threads_avioes = 0;
+
 aeroporto_t* meu_aeroporto;  // Ver necessidade de ser global
 int quit_thread_aeroporto = 0;  // Sinaliza para a thread aeroporto finalizar
 
@@ -127,11 +131,19 @@ int main (int argc, char** argv) {
 			// Atribui uma thread responsavel pelo aviao criado
 			pthread_t thread;
 			pthread_create(&thread, NULL, thread_aviao_func, (void *) a);
+			threads_avioes[contador_threads_avioes] = thread;
+			contador_threads_avioes++;
 			a->thread = thread;  // VER
 		}
+		usleep(1000);
 	}
-	sleep(1000);  // REVER MODELO (esperar todos terminarem)
 
+	for (int i = 0; i < contador_threads_avioes; i++)
+    	pthread_join(threads_avioes[i], NULL);
+
+	//sleep(1000);  // REVER MODELO (esperar todos terminarem)
+	quit_thread_aeroporto = 1;
+    pthread_join(thread_aeroporto, NULL);
 	finalizar_aeroporto(meu_aeroporto);
 	return 1;
 }
