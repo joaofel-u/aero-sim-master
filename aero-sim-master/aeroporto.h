@@ -29,9 +29,11 @@ typedef struct {
 	// ADICIONADOS
 	pthread_t thread;
 	fila_ordenada_t *fila_pouso_decolagem;
+	fila_ordenada_t *fila_prioritaria;
 	sem_t pistas;
 	sem_t portoes;
 	sem_t esteiras;
+	sem_t n_avioes;
 	// Adicionar aqui outros atributos que você achar necessários.
 	// Exemplo: esteiras, portões, etc...
 } aeroporto_t;
@@ -95,5 +97,11 @@ void decolar_aviao (aeroporto_t* aeroporto, aviao_t* aviao);
  * alocados pelo aeroporto. Retorna 1 caso bem sucedido.
  **/
 int finalizar_aeroporto (aeroporto_t* aeroporto);
+
+/**
+ * Esta função dá permissão para que um avião utilize as pistas
+ * de pouso e decolagem.
+ **/
+void libera_pouso_decolagem(aviao_t* aviao);
 
 #endif

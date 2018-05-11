@@ -11,6 +11,7 @@ aviao_t * aloca_aviao (size_t combustivel, size_t id) {
     aviao_t *a = (aviao_t *) malloc(sizeof(aviao_t));
     a->combustivel = combustivel;
     a->id = id;
+    sem_init(&a->liberacao_pouso_decolagem, 0, 0);
 
     return a;
 }

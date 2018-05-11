@@ -9,15 +9,15 @@
 // Garantir que é thread-safe
 
 /**
- * Esta estrutura auxiliar deve facilitar a implementação da fila ordenada.
- * Preencha a fila com elemento_t que contém os aviões apontado para o
- * anterior e o próximo. Use estes ponteiros para ordenar a fila a cada
- * insercão
- **/
+* Esta estrutura auxiliar deve facilitar a implementação da fila ordenada.
+* Preencha a fila com elemento_t que contém os aviões apontado para o
+* anterior e o próximo. Use estes ponteiros para ordenar a fila a cada
+* insercão
+**/
 typedef struct elemento_t {
-  struct elemento_t * anterior;
-  struct elemento_t * proximo;
-  aviao_t * dado;
+    struct elemento_t * anterior;
+    struct elemento_t * proximo;
+    aviao_t * dado;
 } elemento_t;
 
 // Alocacao dinamica do elemento
@@ -25,14 +25,14 @@ elemento_t * aloca_elemento (aviao_t * dado);
 void desaloca_elemento (elemento_t * elemento);
 
 /**
- * Esta estrutura de dados deve conter uma fila de aviões odernada por
- * prioridade.
- **/
+* Esta estrutura de dados deve conter uma fila de aviões odernada por
+* prioridade.
+**/
 typedef struct {
-  elemento_t * primeiro;
-  elemento_t * ultimo;
-  size_t n_elementos;
-  pthread_mutex_t mutex;
+    elemento_t * primeiro;
+    elemento_t * ultimo;
+    size_t n_elementos;
+    pthread_mutex_t mutex;
 } fila_ordenada_t;
 
 // Alocacão dinâmica da fila ordenada de aviões

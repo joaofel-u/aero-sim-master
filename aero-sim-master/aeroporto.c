@@ -18,19 +18,25 @@ aeroporto_t* iniciar_aeroporto (size_t* args, size_t n_args) {
 	a->t_inserir_bagagens = args[6];
 	a->t_bagagens_esteira = args[7];
 	a->fila_pouso_decolagem = criar_fila();
+	a->fila_prioritaria = criar_fila();
 	sem_init(&a->pistas, 0, a->n_pistas);
 	sem_init(&a->portoes, 0, a->n_portoes);
 	sem_init(&a->esteiras, 0, (a->n_esteiras * a->n_max_avioes_esteira));
+	sem_init(&a->n_avioes, 0, 0);
 	return a;
 }
 
 void aproximacao_aeroporto (aeroporto_t* aeroporto, aviao_t* aviao) {
-	inserir(aeroporto->fila_pouso_decolagem, aviao);
+	if (aviao->combustivel < 10)
+		inserir(aeroporto->fila_prioritaria, aviao);
+	else
+		inserir(aeroporto->fila_pouso_decolagem, aviao);
+
 	printf("Avião %d iniciou aproximação com %d%c de combustivel.\n", (int) aviao->id, (int) aviao->combustivel, 37);
 }
 
 void pousar_aviao (aeroporto_t* aeroporto, aviao_t* aviao) {
-	sem_wait(&aeroporto->pistas);
+	sem_wait(&aviao->liberacao_pouso_decolagem);
 	remover(aeroporto->fila_pouso_decolagem);
 	usleep(aeroporto->t_pouso_decolagem * MICRO_TO_MILI);
 	printf("Avião %d aterrissou.\n", (int) aviao->id);
@@ -78,4 +84,8 @@ int finalizar_aeroporto (aeroporto_t* aeroporto) {
 	free(aeroporto);
 
 	return 1;
+}
+
+void libera_pouso_decolagem(aviao_t* aviao) {
+    sem_post(&aviao->liberacao_pouso_decolagem);
 }

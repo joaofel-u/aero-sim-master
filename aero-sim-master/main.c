@@ -8,7 +8,7 @@
 #define NOVO_AVIAO_MIN 30
 #define NOVO_AVIAO_MAX 120
 #define COMBUSTIVEL_MIN 1
-#define COMBUSTIVEL_MAX 100 // VER
+#define COMBUSTIVEL_MAX 100
 #define TEMPO_POUSO_DECOLAGEM 40
 #define TEMPO_REMOVER_BAGAGENS 90
 #define TEMPO_INSERIR_BAGAGENS 110
@@ -21,11 +21,11 @@
 */
 
 aeroporto_t* meu_aeroporto;  // Ver necessidade de ser global
+int quit_thread_aeroporto = 0;  // Sinaliza para a thread aeroporto finalizar
 
 void * thread_aviao_func(void* arg);  // Funcao de uma thread que representa um aviao
-void * thread_aeroporto_func(void* arg);  // Funcao de uma thread que representa um aeroporto
 
-int quit_thread_aeroporto = 0;  // Sinaliza quando a thread_aeroporto deve encerrar
+void * thread_aeroporto_func(void* arg);
 
 int main (int argc, char** argv) {
 
@@ -107,16 +107,15 @@ int main (int argc, char** argv) {
 
 	// Descreve aqui sua simulação usando as funções definidas no arquivo "aeroporto.h"
 	// Lembre-se de implementá-las num novo arquivo "aeroporto.c"
-	pthread_t thread_aeroporto;
-	pthread_create(&thread_aeroporto, NULL, thread_aeroporto_func, (void *) meu_aeroporto);
-	meu_aeroporto->thread = thread_aeroporto;
 
 	int proximo_horario = 0;
 	int n_avioes_dia = 0;  // Auxilia no controle do id unico de cada aviao
 	srand(time(NULL));  // Inicia a semente do rand
 
-	// for (int i = 0; i < TEMPO_SIMULACAO; i++) {  // LINHA OFICIAL
-	for (int i = 0; i < 1000; i++) {  // Linha para simplificar os testes
+	pthread_t thread_aeroporto;
+	pthread_create(&thread_aeroporto, NULL, thread_aeroporto_func, (void *) meu_aeroporto);
+
+	for (int i = 0; i < TEMPO_SIMULACAO; i++) {
 		if (i == proximo_horario) {
 			// Calcula horario de chegada do proximo aviao
 			proximo_horario = i + (rand() % 90) + 30;
@@ -132,8 +131,6 @@ int main (int argc, char** argv) {
 		}
 	}
 	sleep(1000);  // REVER MODELO (esperar todos terminarem)
-	quit_thread_aeroporto = 1;  // Sinaliza para a thread_aeroporto encerrar
-	pthread_join(thread_aeroporto, NULL);
 
 	finalizar_aeroporto(meu_aeroporto);
 	return 1;
@@ -141,14 +138,9 @@ int main (int argc, char** argv) {
 
 void * thread_aviao_func(void* arg) {  // Arg = aviao da thread
 	aviao_t* aviao = (aviao_t *) arg;
-	// aviao->thread = pthread_self();  // Ver se isso funciona
 
 	aproximacao_aeroporto(meu_aeroporto, aviao);
 
-	// Espera o aviao ser o proximo a ser autorizado a usar a pista
-	while (aviao != meu_aeroporto->fila_pouso_decolagem->primeiro->dado) {
-		sleep(1);  // Força preempção?
-	}
 	pousar_aviao(meu_aeroporto, aviao);
 
 	acoplar_portao(meu_aeroporto, aviao);
@@ -156,12 +148,18 @@ void * thread_aviao_func(void* arg) {  // Arg = aviao da thread
 	transportar_bagagens(meu_aeroporto, aviao);
 
 	decolar_aviao(meu_aeroporto, aviao);
+
+	pthread_exit(NULL);
+	return NULL;
 }
 
-void * thread_aeroporto_func(void* arg) {  // Arg = aeroporto da thread
-	aeroporto_t* aeroporto = (aeroporto_t *) arg;
-	while (!quit_thread_aeroporto) {
+void * thread_aeroporto_func(void* arg) {
+	aeroporto_t* aeroporto = (aeroporto_t*) arg;
 
+	while (!quit_thread_aeroporto) {
+		sem_wait(&aeroporto->pistas);
 	}
+
 	pthread_exit(NULL);
+	return NULL;
 }
