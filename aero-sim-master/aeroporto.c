@@ -32,7 +32,7 @@
  	else
  		inserir(aeroporto->fila_pouso_decolagem, aviao);
 
-+	sem_post(&aeroporto->n_avioes);  // Sinaliza para a thread aeroporto que um aviao quer a pista
+	sem_post(&aeroporto->n_avioes);  // Sinaliza para a thread aeroporto que um aviao quer a pista
  	printf("Avião %d iniciou aproximação com %d%c de combustivel.\n", (int) aviao->id, (int) aviao->combustivel, 37);
  }
 
@@ -45,11 +45,10 @@
 
  	usleep(aeroporto->t_pouso_decolagem * MICRO_TO_MILI);
  	printf("Avião %d aterrissou.\n", (int) aviao->id);
-+	sem_post(&aeroporto->pistas);
+    sem_post(&aeroporto->pistas);
  }
 
  void acoplar_portao (aeroporto_t* aeroporto, aviao_t* aviao) {
- 	sem_post(&aeroporto->pistas);  // Inverter esta com a proxima se necessario ocupar para desocupar anterior
  	sem_wait(&aeroporto->portoes);
  	printf("Avião %d chegou a um portão de embarque/desembarque.\n", (int) aviao->id);
  }
@@ -72,7 +71,7 @@
  void decolar_aviao (aeroporto_t* aeroporto, aviao_t* aviao) {
  	inserir(aeroporto->fila_pouso_decolagem, aviao);
     sem_post(&aeroporto->n_avioes);
-    sem_post(&aeroporto->portoes);  // Inverter esta e a proxima se necessario desocupar para ocupar
+    sem_post(&aeroporto->portoes); 
  	sem_wait(&aviao->liberacao_pouso_decolagem);
  	remover(aeroporto->fila_pouso_decolagem);
  	usleep(aeroporto->t_pouso_decolagem * MICRO_TO_MILI);

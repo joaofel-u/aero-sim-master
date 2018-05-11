@@ -20,15 +20,17 @@
 	gcc -o build aeroporto.c aeroporto.h aviao.c aviao.h fila.c fila.h main.c -lpthread
 */
 
-// Cuidar com o seg
-pthread_t threads_avioes[TEMPO_SIMULACAO];
-int contador_threads_avioes = 0;
+pthread_t threads_avioes[TEMPO_SIMULACAO/30];
+aeroporto_t* meu_aeroporto;
 
-aeroporto_t* meu_aeroporto;  // Ver necessidade de ser global
-int quit_thread_aeroporto = 0;  // Sinaliza para a thread aeroporto finalizar
-
+/*
+ * Função das threads que representam aviões
+ */
 void * thread_aviao_func(void* arg);  // Funcao de uma thread que representa um aviao
 
+/*
+ * Função da thread aeroporto
+ */
 void * thread_aeroporto_func(void* arg);
 
 int main (int argc, char** argv) {
@@ -113,7 +115,7 @@ int main (int argc, char** argv) {
 	// Lembre-se de implementá-las num novo arquivo "aeroporto.c"
 
 	int proximo_horario = 0;
-	int n_avioes_dia = 0;  // Auxilia no controle do id unico de cada aviao
+	int contador_avioes = 0;  // Auxilia no controle do id unico de cada aviao
 	srand(time(NULL));  // Inicia a semente do rand
 
 	pthread_t thread_aeroporto;
@@ -126,33 +128,19 @@ int main (int argc, char** argv) {
 
 			// Cria aviao
 			int combustivel_novo_aviao = (rand() % 100) + 1;
-			aviao_t *a = aloca_aviao(combustivel_novo_aviao, ++n_avioes_dia);
+			aviao_t *a = aloca_aviao(combustivel_novo_aviao, ++contador_avioes);
 
 			// Atribui uma thread responsavel pelo aviao criado
-			//pthread_t thread;
-			pthread_create(&threads_avioes[contador_threads_avioes], NULL, thread_aviao_func, (void *) a);
-			//threads_avioes[contador_threads_avioes] = thread;
-			contador_threads_avioes++;
-			a->thread = threads_avioes[contador_threads_avioes];  // VER
+			pthread_create(&threads_avioes[contador_avioes], NULL, thread_aviao_func, (void *) a);
+			a->thread = threads_avioes[contador_avioes];
 		}
-		usleep(100);
+		usleep(1000);
 	}
 
-
-
-	for (int i = 0; i < contador_threads_avioes; i++)
+	for (int i = 0; i < contador_avioes; i++)
     	pthread_join(threads_avioes[i], NULL);
 
-	//sleep(1000);  // REVER MODELO (esperar todos terminarem)
-	quit_thread_aeroporto = 1;
-
-	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-	sem_post(&meu_aeroporto->n_avioes);
-
-	pthread_join(thread_aeroporto, NULL);
-	printf("Passou no join\n");
-	finalizar_aeroporto(meu_aeroporto);
-	return 1;
+	return finalizar_aeroporto(meu_aeroporto);
 }
 
 void * thread_aviao_func(void* arg) {  // Arg = aviao da thread
@@ -169,13 +157,14 @@ void * thread_aviao_func(void* arg) {  // Arg = aviao da thread
 	decolar_aviao(meu_aeroporto, aviao);
 
 	pthread_exit(NULL);
+
 	return NULL;
 }
 
 void * thread_aeroporto_func(void* arg) {
 	aeroporto_t* aeroporto = (aeroporto_t*) arg;
 
-	while (!quit_thread_aeroporto) {
+	while (1) {  // So encerra junto com a thread principal
 		sem_wait(&aeroporto->n_avioes);
 		sem_wait(&aeroporto->pistas);
 		if (aeroporto->fila_prioritaria->n_elementos > 0)
