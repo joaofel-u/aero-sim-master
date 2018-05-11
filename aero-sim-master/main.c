@@ -129,21 +129,28 @@ int main (int argc, char** argv) {
 			aviao_t *a = aloca_aviao(combustivel_novo_aviao, ++n_avioes_dia);
 
 			// Atribui uma thread responsavel pelo aviao criado
-			pthread_t thread;
-			pthread_create(&thread, NULL, thread_aviao_func, (void *) a);
-			threads_avioes[contador_threads_avioes] = thread;
+			//pthread_t thread;
+			pthread_create(&threads_avioes[contador_threads_avioes], NULL, thread_aviao_func, (void *) a);
+			//threads_avioes[contador_threads_avioes] = thread;
 			contador_threads_avioes++;
-			a->thread = thread;  // VER
+			a->thread = threads_avioes[contador_threads_avioes];  // VER
 		}
-		usleep(1000);
+		usleep(100);
 	}
+
+
 
 	for (int i = 0; i < contador_threads_avioes; i++)
     	pthread_join(threads_avioes[i], NULL);
 
 	//sleep(1000);  // REVER MODELO (esperar todos terminarem)
 	quit_thread_aeroporto = 1;
-    pthread_join(thread_aeroporto, NULL);
+
+	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+	sem_post(&meu_aeroporto->n_avioes);
+
+	pthread_join(thread_aeroporto, NULL);
+	printf("Passou no join\n");
 	finalizar_aeroporto(meu_aeroporto);
 	return 1;
 }
@@ -171,7 +178,10 @@ void * thread_aeroporto_func(void* arg) {
 	while (!quit_thread_aeroporto) {
 		sem_wait(&aeroporto->n_avioes);
 		sem_wait(&aeroporto->pistas);
-		sem_post(&aeroporto->fila_pouso_decolagem->primeiro->dado->liberacao_pouso_decolagem);
+		if (aeroporto->fila_prioritaria->n_elementos > 0)
+			sem_post(&aeroporto->fila_prioritaria->primeiro->dado->liberacao_pouso_decolagem);
+		else
+			sem_post(&aeroporto->fila_pouso_decolagem->primeiro->dado->liberacao_pouso_decolagem);
 	}
 
 	pthread_exit(NULL);
