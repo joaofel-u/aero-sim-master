@@ -169,7 +169,9 @@ void * thread_aeroporto_func(void* arg) {
 	aeroporto_t* aeroporto = (aeroporto_t*) arg;
 
 	while (!quit_thread_aeroporto) {
+		sem_wait(&aeroporto->n_avioes);
 		sem_wait(&aeroporto->pistas);
+		sem_post(&aeroporto->fila_pouso_decolagem->primeiro->dado->liberacao_pouso_decolagem);
 	}
 
 	pthread_exit(NULL);
