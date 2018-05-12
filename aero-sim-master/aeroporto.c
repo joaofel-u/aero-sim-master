@@ -6,6 +6,9 @@
   * Descrições em aeroporto.h
   **/
 
+pthread_t threads_esteiras[];
+void * thread_esteiras_func(void* arg);
+
  aeroporto_t* iniciar_aeroporto (size_t* args, size_t n_args) {
 
  	aeroporto_t *a = (aeroporto_t *) malloc(sizeof(aeroporto_t));
@@ -23,6 +26,12 @@
  	sem_init(&a->portoes, 0, a->n_portoes);
  	sem_init(&a->esteiras, 0, (a->n_esteiras * a->n_max_avioes_esteira));
  	sem_init(&a->n_avioes, 0, 0);
+
+ 	threads_esteiras[a->n_esteiras];
+ 	for(int i = 0; i < a-> n_esteiras; i++){
+ 		pthread_create(&threads_esteiras[i], NULL, thread_esteiras_func, (void *) a);
+ 	}
+
  	return a;
  }
 
@@ -52,6 +61,11 @@
  	sem_wait(&aeroporto->portoes);
  	printf("Avião %d chegou a um portão de embarque/desembarque.\n", (int) aviao->id);
  }
+
+void * thread_esteiras_func(void* arg) {
+	// IMPLEMENTAÇAO FALTANDO
+	return NULL;
+}
 
  void transportar_bagagens (aeroporto_t* aeroporto, aviao_t* aviao) {
  	usleep(aeroporto->t_remover_bagagens * MICRO_TO_MILI);
